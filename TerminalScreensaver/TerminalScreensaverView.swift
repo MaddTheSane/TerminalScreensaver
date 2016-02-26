@@ -7,20 +7,28 @@
 //
 
 import Cocoa
-
 import ScreenSaver
 
-class TerminalScreensaverView: ScreenSaverView {
+private var oncePref: dispatch_once_t = 0
+
+private let terminalColorPrefKey = "terminalColor"
+private let terminalTextColorPrefKey = "terminalTextColor"
+private let lineDelayPrefKey = "lineDelayTime"
+private let textFontSizePrefKey = "textFontSize"
+private let repeatEnabledPrefKey = "isRepeatEnabled"
+private let terminalTextPrefKey = "terminalText"
+
+public class TerminalScreensaverView: ScreenSaverView {
     
     private var nibArray: NSArray? = nil
     
-    var defaults: NSUserDefaults
+    let defaults: NSUserDefaults
     
-    private var terminalColor: NSColor?
-    private var terminalTextColor: NSColor?
-    private var lineDelay: Double = 0.2
-    private var fontSize: Double = 12
-    private var repeatEnabled: Bool = true
+    dynamic var terminalColor: NSColor = NSColor.blackColor()
+    dynamic var terminalTextColor: NSColor = NSColor.whiteColor()
+    dynamic var lineDelay: Double = 0.2
+    dynamic var fontSize: Double = 12
+    dynamic var repeatEnabled: Bool = true
     
     @IBOutlet weak var configSheet: NSWindow! = nil
     @IBOutlet weak var textConfigSheet: NSWindow! = nil
@@ -36,6 +44,23 @@ class TerminalScreensaverView: ScreenSaverView {
     
     private var list: [String] = []
     private var readPosition: Int = 0
+    
+    override public class func initialize() {
+        dispatch_once(&oncePref) {
+            var initialPrefs: [String: AnyObject] = [
+                lineDelayPrefKey: 0.2,
+                textFontSizePrefKey: 12.0,
+                repeatEnabledPrefKey: true]
+            
+            initialPrefs[terminalColorPrefKey] = NSKeyedArchiver.archivedDataWithRootObject(NSColor.blackColor())
+            initialPrefs[terminalTextColorPrefKey] = NSKeyedArchiver.archivedDataWithRootObject(NSColor.whiteColor())
+
+            let identifier = NSBundle(forClass: TerminalScreensaverView.self).bundleIdentifier!
+            let defaults = ScreenSaverDefaults(forModuleWithName: identifier)!
+
+            defaults.registerDefaults(initialPrefs)
+        }
+    }
     
     @IBAction func applyClick(button: NSButton)
     {
@@ -74,14 +99,15 @@ class TerminalScreensaverView: ScreenSaverView {
     }
     @IBAction func fontSizeSliderChange(slider: NSSlider)
     {
+        fontSize = slider.doubleValue
         fontSizePreference = slider.doubleValue
     }
     
-    override func drawRect(dirtyRect: NSRect) {
+    override public func drawRect(dirtyRect: NSRect) {
         
     }
     
-    override init?(frame: NSRect, isPreview: Bool) {
+    override public init?(frame: NSRect, isPreview: Bool) {
         let identifier = NSBundle(forClass: TerminalScreensaverView.self).bundleIdentifier!
         defaults = ScreenSaverDefaults(forModuleWithName: identifier)!
         
@@ -90,18 +116,16 @@ class TerminalScreensaverView: ScreenSaverView {
         readTerminalTextFile()
     }
     
-    required init?(coder: NSCoder) {
+    required public init?(coder: NSCoder) {
         let identifier = NSBundle(forClass: TerminalScreensaverView.self).bundleIdentifier!
         defaults = ScreenSaverDefaults(forModuleWithName: identifier)!
         
         super.init(coder: coder)
         initialise()
         readTerminalTextFile()
-        
     }
     
     private func initialise() {
-        
         terminalColor = terminalColorPreference
         terminalTextColor = terminalTextColorPreference
         lineDelay = lineDelayPreference
@@ -111,7 +135,7 @@ class TerminalScreensaverView: ScreenSaverView {
         scrollView = NSScrollView(frame: bounds)
         scrollView?.hasVerticalScroller = true
         scrollView?.hasHorizontalScroller = false
-        scrollView?.backgroundColor = terminalColor!
+        scrollView?.backgroundColor = terminalColor
         
         scrollView?.autoresizingMask = NSAutoresizingMaskOptions([.ViewWidthSizable,.ViewHeightSizable]);
         let contentSize: NSSize = (scrollView?.contentSize)!
@@ -134,9 +158,7 @@ class TerminalScreensaverView: ScreenSaverView {
         addSubview(scrollView!)
         
         animationTimeInterval = lineDelay
-        
     }
-    
     
     private func readTerminalTextFile() {
         
@@ -161,8 +183,6 @@ class TerminalScreensaverView: ScreenSaverView {
         } else {
             readTerminalTextFromBundle()
         }
-        
-        
     }
     
     private func readTerminalTextFromBundle() {
@@ -176,34 +196,32 @@ class TerminalScreensaverView: ScreenSaverView {
                 list.append(line)
             }
         }
-        
     }
     
-    override func startAnimation() {
+    override public func startAnimation() {
         super.startAnimation()
     }
     
-    override func stopAnimation() {
+    override public func stopAnimation() {
         super.stopAnimation()
     }
     
-    override func animateOneFrame() {
+    override public func animateOneFrame() {
         
         if(readPosition < list.count) {
             append(list[readPosition])
             append("\n")
-            readPosition+=1
+            readPosition += 1
         } else if repeatEnabled {
             readPosition = 0
         }
-        
     }
     
-    override func hasConfigureSheet() -> Bool {
+    override public func hasConfigureSheet() -> Bool {
         return true
     }
     
-    override func configureSheet() -> NSWindow? {
+    override public func configureSheet() -> NSWindow? {
         if configSheet == nil {
             let ourBundle = NSBundle(forClass: self.dynamicType)
             ourBundle.loadNibNamed("PreferenceWindow", owner: self, topLevelObjects: &nibArray)
@@ -222,28 +240,29 @@ class TerminalScreensaverView: ScreenSaverView {
         return configSheet
     }
     
-    
     func append(string: String) {
         let textView = scrollView?.documentView as! NSTextView
         let attributedString = NSMutableAttributedString(string: string)
         let range = NSMakeRange(0, (string as NSString).length)
-        attributedString.addAttribute(NSForegroundColorAttributeName , value:terminalTextColor!,range: range)
+        attributedString.addAttribute(NSForegroundColorAttributeName , value:terminalTextColor,range: range)
         attributedString.addAttribute(NSFontAttributeName, value: NSFont.systemFontOfSize(CGFloat(fontSize)), range: range)
         textView.textStorage?.appendAttributedString(attributedString)
         textView.scrollToEndOfDocument(nil)
     }
     
-    
     var terminalColorPreference: NSColor {
         set(newColor) {
-            defaults.setObject(NSKeyedArchiver.archivedDataWithRootObject(newColor), forKey: "terminalColor")
+            defaults.setObject(NSKeyedArchiver.archivedDataWithRootObject(newColor), forKey: terminalColorPrefKey)
             defaults.synchronize()
         }
         get {
-            if let terminalColorData = defaults.objectForKey("terminalColor") as? NSData {
-                return (NSKeyedUnarchiver.unarchiveObjectWithData(terminalColorData) as? NSColor)!
+            if let terminalColorData = defaults.dataForKey(terminalColorPrefKey),
+			color = NSKeyedUnarchiver.unarchiveObjectWithData(terminalColorData) as? NSColor {
+                return color
             }
             else {
+				//Clear out any bad data
+				defaults.removeObjectForKey(terminalColorPrefKey)
                 return NSColor.blackColor()
             }
         }
@@ -251,14 +270,17 @@ class TerminalScreensaverView: ScreenSaverView {
     
     var terminalTextColorPreference: NSColor {
         set(newColor) {
-            defaults.setObject(NSKeyedArchiver.archivedDataWithRootObject(newColor), forKey: "terminalTextColor")
+            defaults.setObject(NSKeyedArchiver.archivedDataWithRootObject(newColor), forKey: terminalTextColorPrefKey)
             defaults.synchronize()
         }
         get {
-            if let terminalColorData = defaults.objectForKey("terminalTextColor") as? NSData {
-                return (NSKeyedUnarchiver.unarchiveObjectWithData(terminalColorData) as? NSColor)!
+            if let terminalColorData = defaults.dataForKey(terminalTextColorPrefKey),
+			color = NSKeyedUnarchiver.unarchiveObjectWithData(terminalColorData) as? NSColor {
+                return color
             }
             else {
+				//Clear out any bad data
+				defaults.removeObjectForKey(terminalTextColorPrefKey)
                 return NSColor.whiteColor()
             }
         }
@@ -266,11 +288,11 @@ class TerminalScreensaverView: ScreenSaverView {
     
     var terminalTextPreference: String {
         set(newValue) {
-            defaults.setObject(newValue, forKey: "terminalText")
+            defaults.setObject(newValue, forKey: terminalTextPrefKey)
             defaults.synchronize()
         }
         get {
-            if let terminaltextData = defaults.stringForKey("terminalText") {
+            if let terminaltextData = defaults.stringForKey(terminalTextPrefKey) {
                 return terminaltextData
             }
             else {
@@ -281,37 +303,36 @@ class TerminalScreensaverView: ScreenSaverView {
     
     var lineDelayPreference: Double {
         set(newValue) {
-            defaults.setDouble(newValue, forKey: "lineDelayTime")
+            defaults.setDouble(newValue, forKey: lineDelayPrefKey)
             defaults.synchronize()
         }
         get {
-            return defaults.doubleForKey("lineDelayTime")
+            return defaults.doubleForKey(lineDelayPrefKey)
         }
     }
     
     var fontSizePreference: Double {
         set(newValue) {
-            defaults.setDouble(newValue, forKey: "textFontSize")
+            defaults.setDouble(newValue, forKey: textFontSizePrefKey)
             defaults.synchronize()
         }
         get {
-            return defaults.doubleForKey("textFontSize")
+            return defaults.doubleForKey(textFontSizePrefKey)
         }
     }
     
     var repeatEnabledPreference: Bool {
         set(newValue) {
-            defaults.setBool(newValue, forKey: "isRepeatEnabled")
+            defaults.setBool(newValue, forKey: repeatEnabledPrefKey)
             defaults.synchronize()
         }
         get {
-            return defaults.boolForKey("isRepeatEnabled")
+            return defaults.boolForKey(repeatEnabledPrefKey)
         }
     }
     
     class StreamReader  {
-        
-        let encoding : UInt
+        let encoding : NSStringEncoding
         let chunkSize : Int
         
         var fileHandle : NSFileHandle!
