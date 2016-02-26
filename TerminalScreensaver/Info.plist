@@ -23,6 +23,6 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2016 naman14. All rights reserved.</string>
 	<key>NSPrincipalClass</key>
-	<string>TerminalScreensaverView</string>
+	<string>$(PRODUCT_MODULE_NAME).TerminalScreensaverView</string>
 </dict>
 </plist>

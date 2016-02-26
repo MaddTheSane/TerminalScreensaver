@@ -18,9 +18,9 @@ class TerminalScreensaverView: ScreenSaverView {
     
     private var terminalColor: NSColor?
     private var terminalTextColor: NSColor?
-    private var lineDelay: Double?
-    private var fontSize: Double?
-    private var repeatEnabled: Int?
+    private var lineDelay: Double = 0.2
+    private var fontSize: Double = 12
+    private var repeatEnabled: Bool = true
     
     @IBOutlet weak var configSheet: NSWindow! = nil
     @IBOutlet weak var textConfigSheet: NSWindow! = nil
@@ -34,7 +34,7 @@ class TerminalScreensaverView: ScreenSaverView {
     private var textLabel: NSTextView?
     private var scrollView: NSScrollView?
     
-    private var list: [NSString] = []
+    private var list: [String] = []
     private var readPosition: Int = 0
     
     @IBAction func applyClick(button: NSButton)
@@ -59,12 +59,12 @@ class TerminalScreensaverView: ScreenSaverView {
     @IBAction func isRepeatStateChange(button: NSButton)
     {
         if(button.state == NSOnState) {
-            repeatEnabledPreference = 1
-            repeatEnabled = 1
+            repeatEnabledPreference = true
+            repeatEnabled = true
         }
         else {
-            repeatEnabledPreference = 0
-            repeatEnabled = 0
+            repeatEnabledPreference = false
+            repeatEnabled = false
         }
     }
     @IBAction func lineDelaySliderChange(slider: NSSlider)
@@ -82,8 +82,8 @@ class TerminalScreensaverView: ScreenSaverView {
     }
     
     override init?(frame: NSRect, isPreview: Bool) {
-        let identifier = NSBundle(forClass: TerminalScreensaverView.self).bundleIdentifier
-        defaults = ScreenSaverDefaults(forModuleWithName: identifier!)!
+        let identifier = NSBundle(forClass: TerminalScreensaverView.self).bundleIdentifier!
+        defaults = ScreenSaverDefaults(forModuleWithName: identifier)!
         
         super.init(frame: frame, isPreview: isPreview)
         initialise()
@@ -91,8 +91,8 @@ class TerminalScreensaverView: ScreenSaverView {
     }
     
     required init?(coder: NSCoder) {
-        let identifier = NSBundle(forClass: TerminalScreensaverView.self).bundleIdentifier
-        defaults = ScreenSaverDefaults(forModuleWithName: identifier!)!
+        let identifier = NSBundle(forClass: TerminalScreensaverView.self).bundleIdentifier!
+        defaults = ScreenSaverDefaults(forModuleWithName: identifier)!
         
         super.init(coder: coder)
         initialise()
@@ -133,14 +133,14 @@ class TerminalScreensaverView: ScreenSaverView {
         
         addSubview(scrollView!)
         
-        animationTimeInterval = lineDelay!
+        animationTimeInterval = lineDelay
         
     }
     
     
     private func readTerminalTextFile() {
         
-        if let dir : NSString = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.AllDomainsMask, true).first {
+        if let dir : NSString = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first {
             
             let path = dir.stringByAppendingPathComponent("terminalscreensaver.txt");
             let checkValidation = NSFileManager.defaultManager()
@@ -167,8 +167,8 @@ class TerminalScreensaverView: ScreenSaverView {
     
     private func readTerminalTextFromBundle() {
         let bundle = NSBundle(forClass: TerminalScreensaverView.self)
-        let path = bundle.pathForResource("terminalscreensaver", ofType: "txt")
-        if let aStreamReader = StreamReader(path: path!) {
+        let path = bundle.URLForResource("terminalscreensaver", withExtension: "txt")
+        if let aStreamReader = StreamReader(URL: path!) {
             defer {
                 aStreamReader.close()
             }
@@ -193,7 +193,7 @@ class TerminalScreensaverView: ScreenSaverView {
             append(list[readPosition])
             append("\n")
             readPosition+=1
-        } else if(repeatEnabled == 1){
+        } else if repeatEnabled {
             readPosition = 0
         }
         
@@ -210,10 +210,10 @@ class TerminalScreensaverView: ScreenSaverView {
             terminalColorWell!.color = terminalColorPreference
             terminalTextColorWell!.color = terminalTextColorPreference
             lineDelaySlider?.doubleValue = lineDelayPreference
-            lineDelaySliderLabel?.stringValue =  String(format:"%.2f", lineDelay!) + " seconds"
+            lineDelaySliderLabel?.stringValue =  String(format:"%.2f", lineDelay) + " seconds"
             fontSizeSlider?.doubleValue = fontSizePreference
             
-            if(repeatEnabledPreference == 1){
+            if repeatEnabledPreference {
                 isRepeatEnabledButton?.state = NSOnState
             } else {
                 isRepeatEnabledButton?.state = NSOffState
@@ -223,12 +223,12 @@ class TerminalScreensaverView: ScreenSaverView {
     }
     
     
-    func append(string: NSString) {
+    func append(string: String) {
         let textView = scrollView?.documentView as! NSTextView
-        let attributedString = NSMutableAttributedString(string: string as String)
-        let range = NSMakeRange(0, string.length)
+        let attributedString = NSMutableAttributedString(string: string)
+        let range = NSMakeRange(0, (string as NSString).length)
         attributedString.addAttribute(NSForegroundColorAttributeName , value:terminalTextColor!,range: range)
-        attributedString.addAttribute(NSFontAttributeName, value: NSFont.systemFontOfSize(CGFloat(fontSize!)), range: range)
+        attributedString.addAttribute(NSFontAttributeName, value: NSFont.systemFontOfSize(CGFloat(fontSize)), range: range)
         textView.textStorage?.appendAttributedString(attributedString)
         textView.scrollToEndOfDocument(nil)
     }
@@ -264,17 +264,17 @@ class TerminalScreensaverView: ScreenSaverView {
         }
     }
     
-    var terminalTextPreference: NSString {
+    var terminalTextPreference: String {
         set(newValue) {
             defaults.setObject(newValue, forKey: "terminalText")
             defaults.synchronize()
         }
         get {
-            if let terminaltextData = defaults.objectForKey("terminalText") as? NSString {
+            if let terminaltextData = defaults.stringForKey("terminalText") {
                 return terminaltextData
             }
             else {
-                return NSString(string: "This is a lol string")
+                return "This is a lol string"
             }
         }
     }
@@ -285,12 +285,7 @@ class TerminalScreensaverView: ScreenSaverView {
             defaults.synchronize()
         }
         get {
-            if let double = defaults.doubleForKey("lineDelayTime") as Double? {
-                return double
-            }
-            else {
-                return 0.2
-            }
+            return defaults.doubleForKey("lineDelayTime")
         }
     }
     
@@ -300,27 +295,17 @@ class TerminalScreensaverView: ScreenSaverView {
             defaults.synchronize()
         }
         get {
-            if let double = defaults.doubleForKey("textFontSize") as Double? {
-                return double
-            }
-            else {
-                return 12
-            }
+            return defaults.doubleForKey("textFontSize")
         }
     }
     
-    var repeatEnabledPreference: Int {
+    var repeatEnabledPreference: Bool {
         set(newValue) {
-            defaults.setInteger(newValue, forKey: "isRepeatEnabled")
+            defaults.setBool(newValue, forKey: "isRepeatEnabled")
             defaults.synchronize()
         }
         get {
-            if let bool = defaults.integerForKey("isRepeatEnabled") as Int? {
-                return bool
-            }
-            else {
-                return 1
-            }
+            return defaults.boolForKey("isRepeatEnabled")
         }
     }
     
@@ -334,11 +319,11 @@ class TerminalScreensaverView: ScreenSaverView {
         let delimData : NSData!
         var atEof : Bool = false
         
-        init?(path: String, delimiter: String = "\n", encoding : UInt = NSUTF8StringEncoding, chunkSize : Int = 4096) {
+        init?(URL: NSURL, delimiter: String = "\n", encoding : NSStringEncoding = NSUTF8StringEncoding, chunkSize : Int = 4096) {
             self.chunkSize = chunkSize
             self.encoding = encoding
             
-            if let fileHandle = NSFileHandle(forReadingAtPath: path),
+            if let fileHandle = try? NSFileHandle(forReadingFromURL: URL),
                 delimData = delimiter.dataUsingEncoding(encoding),
                 buffer = NSMutableData(capacity: chunkSize)
             {
@@ -351,6 +336,10 @@ class TerminalScreensaverView: ScreenSaverView {
                 self.buffer = nil
                 return nil
             }
+        }
+
+        convenience init?(path: String, delimiter: String = "\n", encoding : NSStringEncoding = NSUTF8StringEncoding, chunkSize : Int = 4096) {
+            self.init(URL: NSURL(fileURLWithPath: path), delimiter: delimiter, encoding: encoding, chunkSize: chunkSize)
         }
         
         deinit {
@@ -374,10 +363,10 @@ class TerminalScreensaverView: ScreenSaverView {
                     atEof = true
                     if buffer.length > 0 {
                         // Buffer contains last line in file (not terminated by delimiter).
-                        let line = NSString(data: buffer, encoding: encoding)
+                        let line = String(data: buffer, encoding: encoding)
                         
                         buffer.length = 0
-                        return line as String?
+                        return line
                     }
                     // No more lines.
                     return nil
@@ -387,12 +376,12 @@ class TerminalScreensaverView: ScreenSaverView {
             }
             
             // Convert complete line (excluding the delimiter) to a string:
-            let line = NSString(data: buffer.subdataWithRange(NSMakeRange(0, range.location)),
+            let line = String(data: buffer.subdataWithRange(NSMakeRange(0, range.location)),
                 encoding: encoding)
             // Remove line (and the delimiter) from the buffer:
             buffer.replaceBytesInRange(NSMakeRange(0, range.location + range.length), withBytes: nil, length: 0)
             
-            return line as String?
+            return line
         }
         
         /// Start reading from the beginning of file.
@@ -408,6 +397,4 @@ class TerminalScreensaverView: ScreenSaverView {
             fileHandle = nil
         }
     }
-    
-    
 }

@@ -69,6 +69,7 @@
 				ED26DFFF1C7FA75F001A4968 /* terminalscreensaver.txt */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 0;
 		};
 		EDA5BCEA1C7B6F4700EB191F /* Products */ = {
 			isa = PBXGroup;
