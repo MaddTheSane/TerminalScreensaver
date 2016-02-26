@@ -24,7 +24,11 @@ public class TerminalScreensaverView: ScreenSaverView {
     
     let defaults: NSUserDefaults
     
-    dynamic var terminalColor: NSColor = NSColor.blackColor()
+    dynamic var terminalColor: NSColor = NSColor.blackColor() {
+        didSet {
+            scrollView?.backgroundColor = terminalColor
+        }
+    }
     dynamic var terminalTextColor: NSColor = NSColor.whiteColor()
     dynamic var lineDelay: Double = 0.2
     dynamic var fontSize: Double = 12
@@ -85,11 +89,9 @@ public class TerminalScreensaverView: ScreenSaverView {
     {
         if(button.state == NSOnState) {
             repeatEnabledPreference = true
-            repeatEnabled = true
         }
         else {
             repeatEnabledPreference = false
-            repeatEnabled = false
         }
     }
     @IBAction func lineDelaySliderChange(slider: NSSlider)

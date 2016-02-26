@@ -14,7 +14,7 @@
 		ED6D722C1C7B866500E9A98F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ED6D722B1C7B866500E9A98F /* Assets.xcassets */; };
 		ED6D722F1C7B866500E9A98F /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED6D722D1C7B866500E9A98F /* MainMenu.xib */; };
 		ED6D72371C7B894100E9A98F /* TerminalScreensaverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA5BCF61C7B726700EB191F /* TerminalScreensaverView.swift */; };
-		ED6D72391C7B899900E9A98F /* PreferenceWindow.xib in Sources */ = {isa = PBXBuildFile; fileRef = ED6D72211C7B83B800E9A98F /* PreferenceWindow.xib */; };
+		ED6D72391C7B899900E9A98F /* PreferenceWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED6D72211C7B83B800E9A98F /* PreferenceWindow.xib */; };
 		EDA5BCF71C7B726700EB191F /* TerminalScreensaverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA5BCF61C7B726700EB191F /* TerminalScreensaverView.swift */; };
 /* End PBXBuildFile section */
 
@@ -180,6 +180,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED6D72391C7B899900E9A98F /* PreferenceWindow.xib in Resources */,
 				ED26E0031C7FC068001A4968 /* terminalscreensaver.txt in Resources */,
 				ED6D722C1C7B866500E9A98F /* Assets.xcassets in Resources */,
 				ED6D722F1C7B866500E9A98F /* MainMenu.xib in Resources */,
@@ -202,7 +203,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ED6D72391C7B899900E9A98F /* PreferenceWindow.xib in Sources */,
 				ED6D72371C7B894100E9A98F /* TerminalScreensaverView.swift in Sources */,
 				ED6D722A1C7B866500E9A98F /* AppDelegate.swift in Sources */,
 			);

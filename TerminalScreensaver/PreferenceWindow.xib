@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9531" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9531"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9532"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="TerminalScreensaverView" customModule="TerminalScreensaver">
@@ -52,6 +52,7 @@ Gw
                         <color key="color" red="0.05813049898" green="0.055541899059999997" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                         <connections>
                             <action selector="backgroundColorClick:" target="-2" id="462-kF-8Ye"/>
+                            <binding destination="-2" name="value" keyPath="self.terminalColor" id="EsM-eY-MEc"/>
                         </connections>
                     </colorWell>
                     <box verticalHuggingPriority="750" fixedFrame="YES" title="Box" boxType="separator" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="Qfe-Aa-ALo">
@@ -93,7 +94,7 @@ Gw
                         </textFieldCell>
                     </textField>
                     <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="d1i-ME-vyk">
-                        <rect key="frame" x="231" y="188" width="140" height="21"/>
+                        <rect key="frame" x="231" y="188" width="140" height="20"/>
                         <sliderCell key="cell" continuous="YES" alignment="left" minValue="0.10000000000000001" maxValue="5" doubleValue="0.20000000000000001" tickMarkPosition="above" sliderType="linear" id="P9s-kC-tDy"/>
                         <connections>
                             <action selector="lineDelaySliderChange:" target="-2" id="jcz-F1-vPz"/>
@@ -110,7 +111,7 @@ Gw
                         </connections>
                     </button>
                     <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oNp-1v-DoR">
-                        <rect key="frame" x="136" y="121" width="140" height="21"/>
+                        <rect key="frame" x="136" y="121" width="140" height="20"/>
                         <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="5" maxValue="25" doubleValue="12" tickMarkPosition="above" sliderType="linear" id="4lc-dI-4tT"/>
                         <connections>
                             <action selector="fontSizeSliderChange:" target="-2" id="G7Q-WS-tSe"/>
@@ -152,6 +153,12 @@ Gw
                         </buttonCell>
                         <connections>
                             <action selector="isRepeatStateChange:" target="-2" id="Dk0-9t-bBa"/>
+                            <binding destination="-2" name="value" keyPath="self.repeatEnabled" id="CbT-qD-iMD">
+                                <dictionary key="options">
+                                    <integer key="NSNotApplicablePlaceholder" value="0"/>
+                                    <integer key="NSNullPlaceholder" value="0"/>
+                                </dictionary>
+                            </binding>
                         </connections>
                     </button>
                     <colorWell fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NHw-BQ-Q5X">
@@ -159,6 +166,7 @@ Gw
                         <color key="color" red="0.05813049898" green="0.055541899059999997" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                         <connections>
                             <action selector="terminalTextColorClick:" target="-2" id="5F6-Zp-sY5"/>
+                            <binding destination="-2" name="value" keyPath="self.terminalTextColor" id="iaW-tD-H86"/>
                         </connections>
                     </colorWell>
                 </subviews>

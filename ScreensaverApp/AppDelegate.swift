@@ -28,6 +28,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(aNotification: NSNotification) {
     }
 
+    @objc(didEndPref:returnCode:contextInfo:) private func didEndPref(sheet: NSWindow, returnCode: Int, contextInfo: UnsafeMutablePointer<Void>) {
+        sheet.orderOut(self)
+    }
 
+	@IBAction func showPreferenceWindow(sender: AnyObject) {
+        if let prefWin = screenSaverView?.configureSheet() {
+            NSApp.beginSheet(prefWin, modalForWindow: window!, modalDelegate: self, didEndSelector: "didEndPref:returnCode:contextInfo:", contextInfo: nil)
+        }
+	}
 }
 
